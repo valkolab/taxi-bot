@@ -26,7 +26,10 @@ user_state = {}
 def start(message):
     chat_id = message.chat.id
     user_state.pop(str(chat_id), None)
-    send_menu(chat_id)
+    try:
+        send_menu(chat_id)
+    except Exception as e:
+        bot.send_message(chat_id, "Помилка: " + str(e))
 
 def send_menu(chat_id):
     markup = telebot.types.InlineKeyboardMarkup()
