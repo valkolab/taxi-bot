@@ -1,6 +1,7 @@
 import os
 import telebot
 import gspread
+import json
 from oauth2client.service_account import ServiceAccountCredentials
 from flask import Flask, request
 from datetime import datetime
@@ -13,7 +14,6 @@ bot = telebot.TeleBot(TOKEN)
 app = Flask(__name__)
 
 def get_sheet():
-    import json
     creds_dict = json.loads(CREDS_JSON)
     scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
     creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
@@ -69,7 +69,8 @@ def handle_amount(message):
 
 @app.route("/" + TOKEN, methods=["POST"])
 def webhook():
-    bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
+    update = telebot.types.Update.de_json(request.stream.read().decode("utf-8"))
+    bot.process_new_updates([update])
     return "OK", 200
 
 @app.route("/")
@@ -77,6 +78,4 @@ def index():
     return "Bot is running!", 200
 
 if __name__ == "__main__":
-    bot.remove_webhook()
-    bot.set_webhook(url=os.environ.get("WEBHOOK_URL") + "/" + TOKEN)
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
