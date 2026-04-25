@@ -72,8 +72,13 @@ def handle_amount(message):
 
 @app.route("/" + TOKEN, methods=["POST"])
 def webhook():
-    update = telebot.types.Update.de_json(request.stream.read().decode("utf-8"))
-    bot.process_new_updates([update])
+    try:
+        json_str = request.stream.read().decode("utf-8")
+        print("Received:", json_str)
+        update = telebot.types.Update.de_json(json_str)
+        bot.process_new_updates([update])
+    except Exception as e:
+        print("Webhook error:", str(e))
     return "OK", 200
 
 @app.route("/")
